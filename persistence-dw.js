@@ -40,8 +40,7 @@ function updateStockListFromDB(db, stockList){
     "ordered" : true,
     "w" : 1
   };
-  var promise =  db.collection('stocks_data').bulkWrite(bulkUpdateOps, options);
-  mongoDb.close();
+  var promise = db.collection('stocks_data').bulkWrite(bulkUpdateOps, options);
   return promise;
 }
 
@@ -68,7 +67,7 @@ function getStockEntry(symbol, dateEntry){
 
 function updateStockList(stockList){
   return getDb().then(function() {
-    updateStockListFromDB(mongoDb, stockList);
+    return updateStockListFromDB(mongoDb, stockList);
   });
 }
 
