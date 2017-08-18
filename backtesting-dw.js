@@ -1,5 +1,8 @@
+var persistence = require('./persistence-dw');
 var strategyA = require('./strategies/strategyA');
 var strategyDao = require('./strategies/strategies-dao');
+var _ = require('underscore');
+
 
 var program = {
 	daysPassed = 0,
@@ -34,6 +37,7 @@ var config = {
 
 function backtest(){
 	var initDate = new Date(Date.parse(config.generics.initIn));
+	program.initialPatrimony = config.generics.patrimony;
 	for (var d = initDate; d <= Date.now(); d.setDate(d.getDate() + 1)) {
 		processDate(new Date(d));
 	    console.log(new Date(d).toISOString().substring(0,10));
@@ -72,6 +76,39 @@ function operate(d){
 	var shortDate = date.toISOString().substring(0,10);
 	result[shortDate] = {};
 	var rep = result[shortDate];
+	if(program.distribution.length < config.generics.actions){
+		goForEntries(d);
+	}
+	processActualDistributions(d, program.distribution);
+}
+
+function processActualDistributions(d, distributions, index){
+	var index = index | 0;
+	if(index == distributions.length){
+		return;
+	}
+	var distributionItem = distributions[index];
+	var distribution = distributions[index];
+}
+
+function goForEntries(d){
+	var shortDate = date.toISOString().substring(0,10);
+	var misingEntries = config.generics.actions - program.distribution.length;
+	strategyDao.getStrategyRatesFromDB(shortDate, strategyA.getName()).then(strategyRates => {
+		var selectedStocks = strategyRates.slice(0, misingEntries);
+		_.each(selectedStocks, goIn);
+	});
+}
+
+function goIn(selectedStock){
+	var dateEntry = selectedStock.dateEntry;
+	var symbol = selectedStock.symbol;
+	persistence.getStockEntry(symbol, dateEntry).then(stockEntry => {
+		var misingEntries = config.generics.actions - program.distribution.length;
+		var close = stockEntry.prices.close;
+		var entryValue = program.patrimony / missingEntries;
+		var baseValue = entryValue - (entryValue >= config.comission.in.fixed);
+	});
 }
 
 backtest();
