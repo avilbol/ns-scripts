@@ -28,3 +28,7 @@ items.forEach(
     console.log(entries.length);
   }
 );
+
+function hola() {
+  // agregando nueva funcion
+}
